@@ -40,7 +40,7 @@ Add-Content -Path $Log -Value "[$([DateTime]::Now)] Total Unlocked Containers = 
             }
         $UserName = (Get-Item $1Container).BaseName
         $ContainerSize = [math]::round($((Get-Item $1Container).Length) /1Gb, 2)
-        $O365DiskInfo = Get-Volume | Select-Object * | Where-Object {$_.FileSystemLabel -like "O365-*" -and $_.FileSystemLabel -notlike "O365-grotendorst*"}
+        $O365DiskInfo = Get-Volume | Select-Object * | Where-Object {$_.FileSystemLabel -like "O365-*" -and $_.FileSystemLabel -notlike "O365-<YOUROWNVHDX IF PRESENT>*"}
         $DiskStatus = $($O365DiskInfo.HealthStatus)
         $DiskSize = [math]::round($($O365DiskInfo.Size)/1Gb, 2)
         $DiskRemain = [math]::round($($O365DiskInfo.SizeRemaining)/1Gb, 2)

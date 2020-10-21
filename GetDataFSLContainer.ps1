@@ -5,8 +5,7 @@
 # By RoGr: 20-10-2020
 #
 # Use Script to get Info from within VHDX O365 FSLogix Containers
-# Will show Size per SubFolder like ODFC,Onedrive,Sharepoint etc. also numbers of OST-files
-# Script will mount / unmount every unlocked Container from Server and get the Info
+# Script will mount / unmount every unlocked Container from Server and get Info
 #
 ########################################################################################################
 
@@ -15,7 +14,7 @@ $AllData = @()
 
 #Logging
 $FileDate=(get-Date).ToString("s").Replace(":","-")
-$LogPath = "<LOGFILEPATH>"
+$LogPath = "<PATH TO LOGFOLDER>"
 $LogName = "GetDataFSLContainer" + "_" + $FileDate + ".log"
 $Log = $LogPath + "\" + $LogName
 
@@ -25,8 +24,8 @@ If (-not( Test-Path "$LogPath")) { New-Item -Path "$LogPath" -ItemType Directory
 If (-not( Test-Path "$Log")) {New-Item -Path $LogPath -Name $LogName -ItemType File}
 Add-Content -Path $Log -Value "[$([DateTime]::Now)] *** Start Logging VHDX Containers ***"
 
-#Get All Unlocked VHDX Files on PATH TO FSLogix Folders with VHDX
-$AllUnlockedFSLContainers = (Get-ChildItem -Filter '*.vhdx' -Path '<PATH TO FSLogix Folders with VHDX>' -recurse | ? { -not (Get-ChildItem $_.Directory -Recurse -File -Filter '*.lock')}).FullName | Sort
+#Get All Unlocked VHDX Files on <SHARE WITH FSL CONTAINERS/VHDX>
+$AllUnlockedFSLContainers = (Get-ChildItem -Filter '*.vhdx' -Path '<SHARE WITH FSL CONTAINERS/VHDX>' -recurse | ? { -not (Get-ChildItem $_.Directory -Recurse -File -Filter '*.lock')}).FullName | Sort
 $UnlockedFSLContainersCount = ($AllUnlockedFSLContainers).Count
 Add-Content -Path $Log -Value "[$([DateTime]::Now)] Total Unlocked Containers = $UnlockedFSLContainersCount"
         
@@ -41,7 +40,7 @@ Add-Content -Path $Log -Value "[$([DateTime]::Now)] Total Unlocked Containers = 
             }
         $UserName = (Get-Item $1Container).BaseName
         $ContainerSize = [math]::round($((Get-Item $1Container).Length) /1Gb, 2)
-        $O365DiskInfo = Get-Volume | Select-Object * | Where-Object {$_.FileSystemLabel -like "O365-*" -and $_.FileSystemLabel -notlike "O365-grotendr*"}
+        $O365DiskInfo = Get-Volume | Select-Object * | Where-Object {$_.FileSystemLabel -like "O365-*" -and $_.FileSystemLabel -notlike "O365-grotendorst*"}
         $DiskStatus = $($O365DiskInfo.HealthStatus)
         $DiskSize = [math]::round($($O365DiskInfo.Size)/1Gb, 2)
         $DiskRemain = [math]::round($($O365DiskInfo.SizeRemaining)/1Gb, 2)
@@ -54,37 +53,37 @@ Add-Content -Path $Log -Value "[$([DateTime]::Now)] Total Unlocked Containers = 
         #ODFC
         $ODFCPath=$FSLFolders[0].FullName
         $OSTFiles=Get-ChildItem -LiteralPath $ODFCPath -Filter '*.ost' -Recurse -ErrorAction SilentlyContinue -ErrorVariable +OSTError
-        $ODFC=[math]::Round($((Get-ChildItem -LiteralPath $ODFCPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $ODFC=[math]::Round($((Get-ChildItem -LiteralPath $ODFCPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #ODFCPersonal
         $ODFCPersonalPath=$FSLFolders[1].FullName
-        $ODFCPersonal=[math]::Round($((Get-ChildItem -LiteralPath $ODFCPersonalPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $ODFCPersonal=[math]::Round($((Get-ChildItem -LiteralPath $ODFCPersonalPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #OfficeFileCache
         $OfficeFileCachePath=$FSLFolders[2].FullName
-        $OfficeFileCache=[math]::Round($((Get-ChildItem -LiteralPath $OfficeFileCachePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $OfficeFileCache=[math]::Round($((Get-ChildItem -LiteralPath $OfficeFileCachePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Onedrive
         $OneDrivePath=$FSLFolders[3].FullName
-        $OneDrive=[math]::Round($((Get-ChildItem -LiteralPath $OneDrivePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $OneDrive=[math]::Round($((Get-ChildItem -LiteralPath $OneDrivePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #OneNote
         $OneNotePath=$FSLFolders[4].FullName
-        $OneNote=[math]::Round($((Get-ChildItem -LiteralPath $OneNotePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $OneNote=[math]::Round($((Get-ChildItem -LiteralPath $OneNotePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #OneNoteUWP
         $OneNoteUWPPath=$FSLFolders[5].FullName
-        $OneNoteUWP=[math]::Round($((Get-ChildItem -LiteralPath $OneNoteUWPPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $OneNoteUWP=[math]::Round($((Get-ChildItem -LiteralPath $OneNoteUWPPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Search
         $SearchPath=$FSLFolders[6].FullName
-        $Search=[math]::Round($((Get-ChildItem -LiteralPath $SearchPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $Search=[math]::Round($((Get-ChildItem -LiteralPath $SearchPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Sharepoint
         $SharepointPath=$FSLFolders[7].FullName
-        $Sharepoint=[math]::Round($((Get-ChildItem -LiteralPath $SharepointPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $Sharepoint=[math]::Round($((Get-ChildItem -LiteralPath $SharepointPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Skype4B
         $Skype4BPath=$FSLFolders[8].FullName
-        $Skype4B=[math]::Round($((Get-ChildItem -LiteralPath $Skype4BPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $Skype4B=[math]::Round($((Get-ChildItem -LiteralPath $Skype4BPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Skype4B_15
         $Skype4B_15Path=$FSLFolders[8].FullName
-        $Skype4B_15=[math]::Round($((Get-ChildItem -LiteralPath $Skype4B_15Path -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $Skype4B_15=[math]::Round($((Get-ChildItem -LiteralPath $Skype4B_15Path -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Teams
         $TeamsPath=$FSLFolders[10].FullName
-        $Teams=[math]::Round($((Get-ChildItem -LiteralPath $TeamsPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1MB)/1,2)
+        $Teams=[math]::Round($((Get-ChildItem -LiteralPath $TeamsPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
         #Cleanup and dismount VHDX
         $DiskMountStatus = "$MountError[0]"
         $UDiskImg = Dismount-DiskImage -ImagePath $1Container
@@ -120,3 +119,4 @@ Add-Content -Path $Log -Value "[$([DateTime]::Now)] Total Unlocked Containers = 
      }
     
  $AllData | Out-GridView 
+

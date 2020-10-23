@@ -1,10 +1,12 @@
+$Host.UI.RawUI.WindowTitle = "Microsoft FSLogix (Office Container) Info v1.0 --- $(Get-Date -Format "dddd dd/MM/yyyy HH:mm")"
+
 #FSL Version
 $FSLVersion = (Get-ItemProperty -Path "C:\Program Files\FSLogix\Apps\frxccd.sys").VersionInfo
 
 #Get VHDX Size from Primary FSLogix Server
 $USER = $env:fullusername
 $SID = (New-Object System.Security.Principal.NTAccount($USER)).Translate([System.Security.Principal.SecurityIdentifier]).value
-$VHDXOnline= "\\DEVFSLS1\FSLogix\" + $($user) + "_" + $($SID)
+$VHDXOnline= "<SHARE WITH VHDX's>" + $($user) + "_" + $($SID)
 #Size of Conatiner on Server in Gb
 $VHDXOnlineSize= [math]::round($((Get-ChildItem -Filter '*.vhdx' -Path $VHDXOnline).Length) /1Gb,2)
 
@@ -87,3 +89,4 @@ $FSLogixOperationalLog
 Write-Host ""
 Write-Host ""
 [void](Read-Host 'Press [Enter] to continue') 
+

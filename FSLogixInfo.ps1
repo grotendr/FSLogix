@@ -6,7 +6,7 @@ $FSLVersion = (Get-ItemProperty -Path "C:\Program Files\FSLogix\Apps\frxccd.sys"
 #Get VHDX Size from Primary FSLogix Server
 $USER = $env:fullusername
 $SID = (New-Object System.Security.Principal.NTAccount($USER)).Translate([System.Security.Principal.SecurityIdentifier]).value
-$VHDXOnline= "<SHARE WITH VHDX's>" + $($user) + "_" + $($SID)
+$VHDXOnline= "<SERVERNAME\SHARENAME>" + $($user) + "_" + $($SID)
 #Size of Conatiner on Server in Gb
 $VHDXOnlineSize= [math]::round($((Get-ChildItem -Filter '*.vhdx' -Path $VHDXOnline).Length) /1Gb,2)
 
@@ -28,6 +28,7 @@ $FSLRootFolderInfo = Get-ChildItem -LiteralPath $DiskID -ErrorAction SilentlyCon
         #Onedrive
         $OneDrivePath=$FSLRootFolderInfo[3].FullName
         $OneDrive=[math]::Round($((Get-ChildItem -LiteralPath $OneDrivePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
+        $OnedriveLF=(Get-ChildItem -recurse -LiteralPath $OneDrivePath | Where-Object {$_.Attributes -eq 'Archive, ReparsePoint'}).Count
         #OneNote
         $OneNotePath=$FSLRootFolderInfo[4].FullName
         $OneNote=[math]::Round($((Get-ChildItem -LiteralPath $OneNotePath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
@@ -40,6 +41,7 @@ $FSLRootFolderInfo = Get-ChildItem -LiteralPath $DiskID -ErrorAction SilentlyCon
         #Sharepoint
         $SharepointPath=$FSLRootFolderInfo[7].FullName
         $Sharepoint=[math]::Round($((Get-ChildItem -LiteralPath $SharepointPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
+        $SharepointLF=(Get-ChildItem -recurse -LiteralPath $SharepointPath | Where-Object {$_.Attributes -eq 'Archive, ReparsePoint'}).Count
         #Skype4B
         $Skype4BPath=$FSLRootFolderInfo[8].FullName
         $Skype4B=[math]::Round($((Get-ChildItem -LiteralPath $Skype4BPath -Recurse | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum / 1MB)/1,2)
@@ -78,8 +80,8 @@ Write-Host ""
 Write-Host "FSLogix Content Information" -ForegroundColor Green
 Write-Host "Outlook Folder Size     : " $ODFC "MB"           
 Write-Host "Outlook OST File(s)     : " $OSTFiles.Count
-Write-Host "OneDrive Folder Size    : " $OneDrive "MB"
-Write-Host "Sharepoint Folder Size  : " $Sharepoint "MB"
+Write-Host "OneDrive Folder Size    : " $OneDrive "MB | " $OnedriveLF "Local File(s)"
+Write-Host "Sharepoint Folder Size  : " $Sharepoint "MB | " $SharepointLF "Local File(s)"
 Write-Host "Teams Folder Size       : " $Teams "MB"
 
 #FSLogix Operational Log Info
